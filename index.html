@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html id="htmlRoot" lang="en" dir="ltr">
+<html id="htmlRoot" lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,6 +65,7 @@
     pointer-events: none;
   }
   .scene.active { opacity: 1; }
+  .scene.active a { pointer-events: auto; }
 
   #scene-logo .logo-circle {
     width: 170px;
@@ -241,12 +242,40 @@
     animation: ctaPulse 2s ease-in-out infinite;
     opacity: 0;
     transition: opacity 0.8s ease;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
   }
   #scene-outro.active .cta { opacity: 1; }
+  #scene-outro .cta:hover { transform: scale(1.08); }
 
   @keyframes ctaPulse {
     0%, 100% { transform: scale(1); box-shadow: 0 10px 45px rgba(236, 72, 153, 0.6); }
     50% { transform: scale(1.07); box-shadow: 0 18px 70px rgba(236, 72, 153, 1); }
+  }
+
+  .site-link {
+    display: block;
+    margin-top: 25px;
+    padding: 10px 25px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(236, 72, 153, 0.5);
+    border-radius: 30px;
+    color: #F0ABFC;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-family: monospace;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+    direction: ltr;
+    word-break: break-all;
+    max-width: 90%;
+  }
+  .site-link:hover {
+    background: rgba(236, 72, 153, 0.35);
+    color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
   }
 
   .progress-bar {
@@ -264,14 +293,13 @@
   .controls {
     position: absolute;
     top: 15px;
-    right: 15px;
+    left: 15px;
     display: flex;
     gap: 10px;
     z-index: 300;
     opacity: 0.4;
     transition: opacity 0.3s;
     flex-wrap: wrap;
-    justify-content: flex-end;
     max-width: 95vw;
   }
   .controls:hover { opacity: 1; }
@@ -366,6 +394,26 @@
   }
   .subtitle.show { opacity: 1; }
 
+  .status {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.7);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 250;
+    border: 1px solid rgba(236, 72, 153, 0.4);
+    max-width: 60%;
+    text-align: left;
+    direction: ltr;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.ok { color: #4CAF50; border-color: #4CAF50; }
+  .status.warn { color: #FF9800; border-color: #FF9800; }
+  .status.error { color: #F44336; border-color: #F44336; }
+
   @media (max-width: 600px) {
     #scene-logo .logo-circle { width: 130px; height: 130px; font-size: 3rem; }
     .feature { padding: 16px 14px; }
@@ -379,6 +427,8 @@
 <body>
 
 <div class="stage" id="stage">
+
+  <div class="status" id="status"></div>
 
   <div class="lang-selector" id="langSelector">
     <h2>🌍 Select Language / انتخاب زبان</h2>
@@ -395,24 +445,25 @@
   </div>
 
   <div class="controls" id="controls" style="display:none;">
-    <button onclick="restart()" id="btnReplay">🔄 Replay</button>
-    <button onclick="toggleMute()" id="muteBtn">🔊 Voice</button>
-    <button onclick="switchLanguage()" id="btnLang">🌍 فارسی</button>
+    <button onclick="restart()" id="btnReplay">🔄 پخش مجدد</button>
+    <button onclick="toggleMute()" id="muteBtn">🔊 صدا</button>
+    <button onclick="switchLanguage()" id="btnLang">🌍 English</button>
+    <button onclick="showVoiceList()">🎙 صداها</button>
   </div>
 
   <div class="scene active" id="scene-logo">
     <div class="logo-circle">B</div>
-    <h1 id="logoTitle">Bale Male</h1>
-    <p id="logoSlogan">The Messenger of a New Generation ✨</p>
+    <h1 id="logoTitle">بله مله</h1>
+    <p id="logoSlogan">پیام‌رسان نسل جدید ✨</p>
   </div>
 
   <div class="scene" id="scene-messages">
     <div class="messages">
-      <div class="bubble received" id="msg1">Hey! You joined Bale Male? 🎉</div>
-      <div class="bubble" id="msg2">Yeah! It's awesome 😎</div>
-      <div class="bubble received" id="msg3">The interface is so smooth ✨</div>
-      <div class="bubble" id="msg4">Super fast too ⚡</div>
-      <div class="bubble received" id="msg5">Best choice ever ❤️</div>
+      <div class="bubble received" id="msg1">سلام! اومدی بله مله؟ 🎉</div>
+      <div class="bubble" id="msg2">آره! خیلی باحاله 😎</div>
+      <div class="bubble received" id="msg3">رابطش خیلی روونه ✨</div>
+      <div class="bubble" id="msg4">سرعتش هم عالیه ⚡</div>
+      <div class="bubble received" id="msg5">بهترین انتخاب ❤️</div>
     </div>
   </div>
 
@@ -420,40 +471,43 @@
     <div class="features">
       <div class="feature" id="f1">
         <span class="icon">⚡</span>
-        <h3>Lightning Fast</h3>
-        <p>Messages delivered in milliseconds</p>
+        <h3>سرعت باورنکردنی</h3>
+        <p>پیام‌ها در کسری از ثانیه ارسال می‌شن</p>
       </div>
       <div class="feature" id="f2">
         <span class="icon">🔒</span>
-        <h3>Total Privacy</h3>
-        <p>Your security is our top priority</p>
+        <h3>امنیت کامل</h3>
+        <p>حریم خصوصی شما اولویت ماست</p>
       </div>
       <div class="feature" id="f3">
         <span class="icon">🎨</span>
-        <h3>Modern Design</h3>
-        <p>Beautiful, simple and user-friendly</p>
+        <h3>رابط مدرن</h3>
+        <p>طراحی زیبا، ساده و کاربرپسند</p>
       </div>
       <div class="feature" id="f4">
         <span class="icon">👥</span>
-        <h3>Groups & Channels</h3>
-        <p>Connect with friends, family, colleagues</p>
+        <h3>گروه و کانال</h3>
+        <p>ارتباط با دوستان، خانواده و همکاران</p>
       </div>
       <div class="feature" id="f5">
         <span class="icon">📞</span>
-        <h3>Voice & Video Calls</h3>
-        <p>Crystal clear quality, no interruptions</p>
+        <h3>تماس صوتی و تصویری</h3>
+        <p>کیفیت بالا و بدون قطعی</p>
       </div>
       <div class="feature" id="f6">
         <span class="icon">✨</span>
-        <h3>Unique Features</h3>
-        <p>Stickers, emojis and more surprises</p>
+        <h3>امکانات ویژه</h3>
+        <p>استیکر، ایموجی و قابلیت‌های منحصر به فرد</p>
       </div>
     </div>
   </div>
 
   <div class="scene" id="scene-outro">
-    <h1 id="outroTitle">Bale Male<br>Your New Best Friend 🚀</h1>
-    <div class="cta" id="outroCta">Try It Now</div>
+    <h1 id="outroTitle">بله مله<br>رفیق جدیدت 🚀</h1>
+    <a href="https://esmaeilnajafih-droid.github.io/balemale/" target="_blank" class="cta" id="outroCta">همین حالا امتحان کن</a>
+    <a href="https://esmaeilnajafih-droid.github.io/balemale/" target="_blank" class="site-link">
+      🌐 esmaeilnajafih-droid.github.io/balemale
+    </a>
   </div>
 
   <div class="subtitle" id="subtitle"></div>
@@ -468,11 +522,11 @@
       logoTitle: 'Bale Male',
       logoSlogan: 'The Messenger of a New Generation ✨',
       messages: [
-        { id: 'msg1', text: "Hey! You joined Bale Male? 🎉", speech: "Hey! You joined Bale Male?", rate: 0.9, pitch: 1.15 },
-        { id: 'msg2', text: "Yeah! It's awesome 😎", speech: "Yeah! It is awesome.", rate: 0.9, pitch: 0.95 },
-        { id: 'msg3', text: "The interface is so smooth ✨", speech: "The interface is so smooth.", rate: 0.9, pitch: 1.15 },
-        { id: 'msg4', text: "Super fast too ⚡", speech: "Super fast too.", rate: 0.9, pitch: 0.95 },
-        { id: 'msg5', text: "Best choice ever ❤️", speech: "Best choice ever.", rate: 0.9, pitch: 1.15 }
+        { id: 'msg1', text: "Hey! You joined Bale Male? 🎉", rate: 0.9, pitch: 1.15 },
+        { id: 'msg2', text: "Yeah! It's awesome 😎", rate: 0.9, pitch: 0.95 },
+        { id: 'msg3', text: "The interface is so smooth ✨", rate: 0.9, pitch: 1.15 },
+        { id: 'msg4', text: "Super fast too ⚡", rate: 0.9, pitch: 0.95 },
+        { id: 'msg5', text: "Best choice ever ❤️", rate: 0.9, pitch: 1.15 }
       ],
       features: [
         { id: 'f1', title: 'Lightning Fast', desc: 'Messages delivered in milliseconds', speech: "Lightning fast. Messages delivered in milliseconds." },
@@ -493,11 +547,11 @@
       logoTitle: 'بله مله',
       logoSlogan: 'پیام‌رسان نسل جدید ✨',
       messages: [
-        { id: 'msg1', text: "سلام! اومدی بله مله؟ 🎉", speech: "سلام! اومدی بله مله؟", rate: 0.9, pitch: 1.15 },
-        { id: 'msg2', text: "آره! خیلی باحاله 😎", speech: "آره! خیلی باحاله.", rate: 0.9, pitch: 0.95 },
-        { id: 'msg3', text: "رابطش خیلی روونه ✨", speech: "رابطش خیلی روونه.", rate: 0.9, pitch: 1.15 },
-        { id: 'msg4', text: "سرعتش هم عالیه ⚡", speech: "سرعتش هم عالیه.", rate: 0.9, pitch: 0.95 },
-        { id: 'msg5', text: "بهترین انتخاب ❤️", speech: "بهترین انتخاب.", rate: 0.9, pitch: 1.15 }
+        { id: 'msg1', text: "سلام! اومدی بله مله؟ 🎉", rate: 0.9, pitch: 1.15 },
+        { id: 'msg2', text: "آره! خیلی باحاله 😎", rate: 0.9, pitch: 0.95 },
+        { id: 'msg3', text: "رابطش خیلی روونه ✨", rate: 0.9, pitch: 1.15 },
+        { id: 'msg4', text: "سرعتش هم عالیه ⚡", rate: 0.9, pitch: 0.95 },
+        { id: 'msg5', text: "بهترین انتخاب ❤️", rate: 0.9, pitch: 1.15 }
       ],
       features: [
         { id: 'f1', title: 'سرعت باورنکردنی', desc: 'پیام‌ها در کسری از ثانیه ارسال می‌شن', speech: "سرعت باورنکردنی. پیام‌ها در کسری از ثانیه ارسال می‌شن." },
@@ -515,7 +569,7 @@
     }
   };
 
-  let currentLang = 'en';
+  let currentLang = 'fa';
   let muted = false;
   let voices = [];
   let selectedVoice = null;
@@ -524,6 +578,7 @@
   const subtitle = document.getElementById('subtitle');
   const langSelector = document.getElementById('langSelector');
   const controls = document.getElementById('controls');
+  const statusEl = document.getElementById('status');
 
   // ===== Particles & Waves =====
   const neonColors = ['#A855F7', '#EC4899', '#F59E0B', '#8B5CF6'];
@@ -567,30 +622,66 @@
     } catch(e) {}
   }
 
-  // ===== Voices =====
+  // ===== Voice Management =====
   function loadVoices() {
     voices = speechSynthesis.getVoices();
     pickVoice();
+    updateStatus();
   }
+
   function pickVoice() {
     const lang = CONTENT[currentLang].lang;
+    // دنبال بهترین صدای زبان مورد نظر بگرد
     selectedVoice =
       voices.find(v => v.lang === lang && /google/i.test(v.name)) ||
-      voices.find(v => v.lang === lang && /natural|premium|enhanced/i.test(v.name)) ||
+      voices.find(v => v.lang === lang && /natural|premium|enhanced|neural/i.test(v.name)) ||
       voices.find(v => v.lang === lang) ||
-      voices.find(v => v.lang.startsWith(currentLang === 'fa' ? 'fa' : 'en')) ||
+      voices.find(v => v.lang.startsWith(lang.split('-')[0])) ||
       null;
   }
+
+  function updateStatus() {
+    const lang = CONTENT[currentLang].lang;
+    const langName = currentLang === 'fa' ? 'فارسی (fa-IR)' : 'English (en-US)';
+
+    if (selectedVoice) {
+      statusEl.textContent = `✅ صدا: ${selectedVoice.name} (${selectedVoice.lang})`;
+      statusEl.className = 'status show ok';
+    } else {
+      statusEl.textContent = `⚠️ صدای ${langName} پیدا نشد! فقط ${voices.length} صدا نصب شده.`;
+      statusEl.className = 'status show warn';
+    }
+    // مخفی کردن بعد از ۶ ثانیه
+    setTimeout(() => { statusEl.classList.remove('show'); }, 6000);
+  }
+
+  function showVoiceList() {
+    const list = voices.map(v => `${v.lang} - ${v.name}`).join('\n');
+    alert(`صداهای نصب‌شده (${voices.length}):\n\n${list || 'هیچ صدایی نصب نیست!'}\n\nصدای فعلی:\n${selectedVoice ? selectedVoice.name + ' (' + selectedVoice.lang + ')' : 'هیچ'}`);
+  }
+
   speechSynthesis.onvoiceschanged = loadVoices;
   loadVoices();
+  setTimeout(loadVoices, 500);
+  setTimeout(loadVoices, 1500);
 
   // ===== Speech with promise =====
-  // این تابع یک Promise برمی‌گردونه که وقتی صدا کامل خونده شد resolve می‌شه
   function speakAndWait(text, rate = 0.9, pitch = 1.1, volume = 0.95) {
     return new Promise((resolve) => {
       if (muted) {
-        // اگه بی‌صدا بود، فقط یه تأخیر کوتاه بده تا هماهنگی حفظ بشه
-        setTimeout(resolve, 800);
+        setTimeout(resolve, 2000);
+        return;
+      }
+
+      // اگه صدای زبان مورد نظر نصب نیست، هشدار بده ولی ادامه بده
+      if (!selectedVoice) {
+        statusEl.textContent = `⚠️ صدای ${currentLang === 'fa' ? 'فارسی' : 'انگلیسی'} نصب نیست! متن نشون داده می‌شه ولی صدا پخش نمی‌شه.`;
+        statusEl.className = 'status show warn';
+        // منتظر بمون به اندازه خوندن متن، بعد برو بعدی
+        setTimeout(() => {
+          statusEl.classList.remove('show');
+          resolve();
+        }, Math.max(2000, text.length * 100));
         return;
       }
 
@@ -603,23 +694,25 @@
       utter.rate = rate;
       utter.pitch = pitch;
       utter.volume = volume;
-      if (selectedVoice) utter.voice = selectedVoice;
+      utter.voice = selectedVoice;
 
       let done = false;
       const finish = () => {
         if (done) return;
         done = true;
         subtitle.classList.remove('show');
-        // فاصله اضافه بعد از هر جمله (نفس‌گیری)
-        setTimeout(resolve, 500);
+        setTimeout(resolve, 600);
       };
 
       utter.onend = finish;
-      utter.onerror = finish;
+      utter.onerror = (e) => {
+        console.warn('Speech error:', e);
+        finish();
+      };
 
-      // تایم‌اوت ایمنی: اگه onend صدا نشد، بعد از مدت تخمینی رد کن
-      const estimatedMs = Math.max(1500, text.length * 90);
-      setTimeout(finish, estimatedMs + 1000);
+      // Timeout ایمنی
+      const estimatedMs = Math.max(2500, text.length * 120);
+      setTimeout(finish, estimatedMs + 2000);
 
       speechSynthesis.speak(utter);
     });
@@ -648,6 +741,7 @@
     document.getElementById('btnLang').textContent = c.switchTo;
 
     pickVoice();
+    updateStatus();
   }
 
   function selectLanguage(lang) {
@@ -681,37 +775,29 @@
     outro: document.getElementById('scene-outro')
   };
 
-  let timers = [];
   let runId = 0;
-
-  function clearTimers() {
-    timers.forEach(t => clearTimeout(t));
-    timers = [];
-    speechSynthesis.cancel();
-    subtitle.classList.remove('show');
-  }
 
   function showScene(name) {
     Object.values(scenes).forEach(s => s.classList.remove('active'));
     scenes[name].classList.add('active');
   }
 
-  // helper: منتظر یه مدت مشخص بمون
   function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // تابع اصلی پخش: از async/await استفاده می‌کنه تا بین جمله‌ها واقعاً صبر کنه
   async function play() {
-    clearTimers();
     runId++;
     const myRun = runId;
+
+    speechSynthesis.cancel();
+    subtitle.classList.remove('show');
 
     document.querySelectorAll('.bubble').forEach(b => b.classList.remove('show'));
     document.querySelectorAll('.feature').forEach(f => f.classList.remove('show'));
 
     const c = CONTENT[currentLang];
 
-    // نوار پیشرفت تخمینی
-    const TOTAL = 34;
+    // نوار پیشرفت
+    const TOTAL = 55;
     let elapsed = 0;
     const tick = setInterval(() => {
       elapsed += 0.2;
@@ -727,17 +813,16 @@
     await wait(500); if (myRun !== runId) return;
     playTone(784, 0.6);
 
-    await wait(500); if (myRun !== runId) return;
+    await wait(800); if (myRun !== runId) return;
     await speakAndWait(c.intro, 0.9, 1.1, 0.95);
     if (myRun !== runId) return;
 
-    // فاصله بین صحنه‌ها
-    await wait(1000);
+    await wait(1200);
     if (myRun !== runId) return;
 
     // ===== صحنه ۲: پیام‌ها =====
     showScene('messages');
-    await wait(600);
+    await wait(800);
     if (myRun !== runId) return;
 
     for (let i = 0; i < c.messages.length; i++) {
@@ -745,22 +830,19 @@
       const m = c.messages[i];
       document.getElementById(m.id).classList.add('show');
       playTone(650, 0.1, 'sine', 0.05);
-      // هر پیام: اول صدا کامل خونده بشه، بعد برو بعدی
-      await speakAndWait(m.speech, m.rate, m.pitch, 0.9);
+      await speakAndWait(m.text.replace(/[🎉😎✨⚡❤️]/g, ''), m.rate, m.pitch, 0.9);
       if (myRun !== runId) return;
-      // فاصله بین پیام‌ها
-      await wait(700);
+      await wait(800);
     }
 
-    // فاصله بین صحنه‌ها
-    await wait(1000);
+    await wait(1200);
     if (myRun !== runId) return;
 
     // ===== صحنه ۳: ویژگی‌ها =====
     showScene('features');
     playTone(523, 0.3);
     playTone(784, 0.3);
-    await wait(600);
+    await wait(800);
     if (myRun !== runId) return;
 
     for (let i = 0; i < c.features.length; i++) {
@@ -770,11 +852,10 @@
       playTone(550, 0.12, 'sine', 0.05);
       await speakAndWait(f.speech, 0.9, 1.05, 0.9);
       if (myRun !== runId) return;
-      await wait(700);
+      await wait(800);
     }
 
-    // فاصله بین صحنه‌ها
-    await wait(1000);
+    await wait(1200);
     if (myRun !== runId) return;
 
     // ===== صحنه ۴: پایانی =====
@@ -784,7 +865,7 @@
     playTone(784, 0.4);
     await wait(300);
     playTone(988, 0.8);
-    await wait(500);
+    await wait(600);
     if (myRun !== runId) return;
     await speakAndWait(c.outro, 0.9, 1.15, 0.95);
   }
@@ -794,6 +875,8 @@
   window.addEventListener('load', () => {
     speechSynthesis.getVoices();
     setTimeout(() => speechSynthesis.getVoices(), 300);
+    setTimeout(() => speechSynthesis.getVoices(), 1000);
+    setTimeout(() => speechSynthesis.getVoices(), 2000);
   });
 </script>
 
