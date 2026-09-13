@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bale Male - Messenger Promo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Tahoma', sans-serif; }
+
+  body {
+    background: #000;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    color: #fff;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, #2a1a4a 0%, #0a0518 75%);
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    20% { opacity: 0.9; }
+    80% { opacity: 0.9; }
+    100% { transform: translateY(-10vh) scale(1.3); opacity: 0; }
+  }
+
+  .wave {
+    position: absolute;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: waveExpand 4s ease-out infinite;
+  }
+  @keyframes waveExpand {
+    0% { width: 0; height: 0; opacity: 0.8; border-width: 3px; }
+    100% { width: 150vmax; height: 150vmax; opacity: 0; border-width: 1px; }
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    padding: 20px;
+    text-align: center;
+    pointer-events: none;
+  }
+  .scene.active { opacity: 1; }
+
+  #scene-logo .logo-circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #A855F7, #EC4899, #F59E0B);
+    background-size: 200% 200%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    animation: logoSpin 3s ease infinite, logoPulse 2s ease-in-out infinite;
+    transform: scale(0);
+    transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 80px rgba(168, 85, 247, 0.8), inset 0 0 40px rgba(255,255,255,0.3);
+  }
+  #scene-logo.active .logo-circle { transform: scale(1); }
+
+  @keyframes logoSpin {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes logoPulse {
+    0%, 100% { box-shadow: 0 0 60px rgba(168, 85, 247, 0.6), inset 0 0 40px rgba(255,255,255,0.3); }
+    50% { box-shadow: 0 0 120px rgba(236, 72, 153, 1), inset 0 0 50px rgba(255,255,255,0.5); }
+  }
+
+  #scene-logo h1 {
+    margin-top: 30px;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    background: linear-gradient(90deg, #A855F7, #EC4899, #F59E0B, #A855F7);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 3s linear infinite;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease 0.6s;
+  }
+  #scene-logo.active h1 { opacity: 1; transform: translateY(0); }
+
+  @keyframes shine {
+    to { background-position: 300% center; }
+  }
+
+  #scene-logo p {
+    margin-top: 15px;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    opacity: 0;
+    transition: opacity 1s ease 1.2s;
+    color: #E9D5FF;
+  }
+  #scene-logo.active p { opacity: 0.9; }
+
+  .messages {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 520px;
+    width: 90%;
+  }
+
+  .bubble {
+    background: linear-gradient(135deg, #A855F7, #EC4899);
+    color: #fff;
+    padding: 15px 22px;
+    border-radius: 22px 22px 5px 22px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    align-self: flex-end;
+    opacity: 0;
+    transform: translateX(50px) scale(0.7);
+    transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+    max-width: 80%;
+  }
+
+  .bubble.received {
+    background: rgba(168, 85, 247, 0.15);
+    color: #fff;
+    border-radius: 22px 22px 22px 5px;
+    align-self: flex-start;
+    transform: translateX(-50px) scale(0.7);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.2);
+  }
+
+  .bubble.show { opacity: 1; transform: translateX(0) scale(1); }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+    max-width: 950px;
+    width: 90%;
+  }
+
+  .feature {
+    background: rgba(168, 85, 247, 0.08);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 20px;
+    padding: 22px 18px;
+    opacity: 0;
+    transform: translateY(50px) scale(0.85);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(236, 72, 153, 0.15), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+  }
+  .feature.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  .feature .icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+    filter: drop-shadow(0 0 10px rgba(236, 72, 153, 0.6));
+  }
+
+  .feature h3 {
+    color: #F0ABFC;
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .feature p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+
+  #scene-outro h1 {
+    font-size: clamp(1.6rem, 5.5vw, 3rem);
+    line-height: 1.7;
+    background: linear-gradient(90deg, #A855F7, #EC4899, #F59E0B, #A855F7);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shine 3s linear infinite;
+  }
+
+  #scene-outro .cta {
+    margin-top: 40px;
+    padding: 18px 50px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #A855F7, #EC4899);
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: bold;
+    box-shadow: 0 10px 45px rgba(236, 72, 153, 0.6);
+    animation: ctaPulse 2s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  #scene-outro.active .cta { opacity: 1; }
+
+  @keyframes ctaPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 45px rgba(236, 72, 153, 0.6); }
+    50% { transform: scale(1.07); box-shadow: 0 18px 70px rgba(236, 72, 153, 1); }
+  }
+
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #A855F7, #EC4899, #F59E0B);
+    width: 0;
+    transition: width 0.2s linear;
+    z-index: 100;
+    box-shadow: 0 0 15px #EC4899;
+  }
+
+  .controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+    z-index: 300;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 95vw;
+  }
+  .controls:hover { opacity: 1; }
+  .controls button {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(236, 72, 153, 0.5);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+  .controls button:hover { background: rgba(236, 72, 153, 0.35); }
+
+  .lang-selector {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(15px);
+    z-index: 500;
+    gap: 25px;
+    transition: opacity 0.6s ease;
+    padding: 20px;
+    text-align: center;
+  }
+  .lang-selector.hidden { opacity: 0; pointer-events: none; }
+
+  .lang-selector h2 {
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    background: linear-gradient(90deg, #A855F7, #EC4899, #F59E0B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  .lang-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .lang-btn {
+    padding: 20px 45px;
+    border-radius: 20px;
+    background: rgba(168, 85, 247, 0.1);
+    border: 2px solid rgba(168, 85, 247, 0.5);
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 180px;
+  }
+  .lang-btn:hover {
+    background: linear-gradient(135deg, #A855F7, #EC4899);
+    border-color: transparent;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(236, 72, 153, 0.5);
+  }
+  .lang-btn .flag { font-size: 2.5rem; }
+
+  .subtitle {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    border: 1px solid rgba(236, 72, 153, 0.5);
+    max-width: 90%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: 150;
+    backdrop-filter: blur(10px);
+  }
+  .subtitle.show { opacity: 1; }
+
+  @media (max-width: 600px) {
+    #scene-logo .logo-circle { width: 130px; height: 130px; font-size: 3rem; }
+    .feature { padding: 16px 14px; }
+    .feature .icon { font-size: 2rem; }
+    .bubble { font-size: 0.95rem; padding: 12px 18px; }
+    .subtitle { font-size: 0.9rem; padding: 8px 18px; }
+    .lang-btn { padding: 15px 30px; font-size: 1rem; min-width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <div class="lang-selector" id="langSelector">
+    <h2>🌍 Select Language / انتخاب زبان</h2>
+    <div class="lang-buttons">
+      <button class="lang-btn" onclick="selectLanguage('fa')">
+        <span class="flag">🇮🇷</span>
+        <span>فارسی</span>
+      </button>
+      <button class="lang-btn" onclick="selectLanguage('en')">
+        <span class="flag">🇬🇧</span>
+        <span>English</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="controls" id="controls" style="display:none;">
+    <button onclick="restart()" id="btnReplay">🔄 Replay</button>
+    <button onclick="toggleMute()" id="muteBtn">🔊 Voice</button>
+    <button onclick="switchLanguage()" id="btnLang">🌍 فارسی</button>
+  </div>
+
+  <div class="scene active" id="scene-logo">
+    <div class="logo-circle">B</div>
+    <h1 id="logoTitle">Bale Male</h1>
+    <p id="logoSlogan">The Messenger of a New Generation ✨</p>
+  </div>
+
+  <div class="scene" id="scene-messages">
+    <div class="messages">
+      <div class="bubble received" id="msg1">Hey! You joined Bale Male? 🎉</div>
+      <div class="bubble" id="msg2">Yeah! It's awesome 😎</div>
+      <div class="bubble received" id="msg3">The interface is so smooth ✨</div>
+      <div class="bubble" id="msg4">Super fast too ⚡</div>
+      <div class="bubble received" id="msg5">Best choice ever ❤️</div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-features">
+    <div class="features">
+      <div class="feature" id="f1">
+        <span class="icon">⚡</span>
+        <h3>Lightning Fast</h3>
+        <p>Messages delivered in milliseconds</p>
+      </div>
+      <div class="feature" id="f2">
+        <span class="icon">🔒</span>
+        <h3>Total Privacy</h3>
+        <p>Your security is our top priority</p>
+      </div>
+      <div class="feature" id="f3">
+        <span class="icon">🎨</span>
+        <h3>Modern Design</h3>
+        <p>Beautiful, simple and user-friendly</p>
+      </div>
+      <div class="feature" id="f4">
+        <span class="icon">👥</span>
+        <h3>Groups & Channels</h3>
+        <p>Connect with friends, family, colleagues</p>
+      </div>
+      <div class="feature" id="f5">
+        <span class="icon">📞</span>
+        <h3>Voice & Video Calls</h3>
+        <p>Crystal clear quality, no interruptions</p>
+      </div>
+      <div class="feature" id="f6">
+        <span class="icon">✨</span>
+        <h3>Unique Features</h3>
+        <p>Stickers, emojis and more surprises</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene-outro">
+    <h1 id="outroTitle">Bale Male<br>Your New Best Friend 🚀</h1>
+    <div class="cta" id="outroCta">Try It Now</div>
+  </div>
+
+  <div class="subtitle" id="subtitle"></div>
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<script>
+  // ===== Content =====
+  const CONTENT = {
+    en: {
+      replay: '🔄 Replay', voiceOn: '🔊 Voice', voiceOff: '🔇 Muted', switchTo: '🌍 فارسی',
+      logoTitle: 'Bale Male',
+      logoSlogan: 'The Messenger of a New Generation ✨',
+      messages: [
+        { id: 'msg1', text: "Hey! You joined Bale Male? 🎉", speech: "Hey! You joined Bale Male?", rate: 0.9, pitch: 1.15 },
+        { id: 'msg2', text: "Yeah! It's awesome 😎", speech: "Yeah! It is awesome.", rate: 0.9, pitch: 0.95 },
+        { id: 'msg3', text: "The interface is so smooth ✨", speech: "The interface is so smooth.", rate: 0.9, pitch: 1.15 },
+        { id: 'msg4', text: "Super fast too ⚡", speech: "Super fast too.", rate: 0.9, pitch: 0.95 },
+        { id: 'msg5', text: "Best choice ever ❤️", speech: "Best choice ever.", rate: 0.9, pitch: 1.15 }
+      ],
+      features: [
+        { id: 'f1', title: 'Lightning Fast', desc: 'Messages delivered in milliseconds', speech: "Lightning fast. Messages delivered in milliseconds." },
+        { id: 'f2', title: 'Total Privacy', desc: 'Your security is our top priority', speech: "Total privacy. Your security is our top priority." },
+        { id: 'f3', title: 'Modern Design', desc: 'Beautiful, simple and user-friendly', speech: "Modern design. Beautiful, simple and user-friendly." },
+        { id: 'f4', title: 'Groups & Channels', desc: 'Connect with friends, family, colleagues', speech: "Groups and channels. Connect with everyone you love." },
+        { id: 'f5', title: 'Voice & Video Calls', desc: 'Crystal clear quality, no interruptions', speech: "Voice and video calls. Crystal clear quality, no interruptions." },
+        { id: 'f6', title: 'Unique Features', desc: 'Stickers, emojis and more surprises', speech: "Unique features. Stickers, emojis and more surprises." }
+      ],
+      outroTitle: 'Bale Male<br>Your New Best Friend 🚀',
+      outroCta: 'Try It Now',
+      intro: "Introducing Bale Male. The messenger of a new generation.",
+      outro: "Bale Male. Your new best friend. Try it now!",
+      lang: 'en-US'
+    },
+    fa: {
+      replay: '🔄 پخش مجدد', voiceOn: '🔊 صدا', voiceOff: '🔇 بی‌صدا', switchTo: '🌍 English',
+      logoTitle: 'بله مله',
+      logoSlogan: 'پیام‌رسان نسل جدید ✨',
+      messages: [
+        { id: 'msg1', text: "سلام! اومدی بله مله؟ 🎉", speech: "سلام! اومدی بله مله؟", rate: 0.9, pitch: 1.15 },
+        { id: 'msg2', text: "آره! خیلی باحاله 😎", speech: "آره! خیلی باحاله.", rate: 0.9, pitch: 0.95 },
+        { id: 'msg3', text: "رابطش خیلی روونه ✨", speech: "رابطش خیلی روونه.", rate: 0.9, pitch: 1.15 },
+        { id: 'msg4', text: "سرعتش هم عالیه ⚡", speech: "سرعتش هم عالیه.", rate: 0.9, pitch: 0.95 },
+        { id: 'msg5', text: "بهترین انتخاب ❤️", speech: "بهترین انتخاب.", rate: 0.9, pitch: 1.15 }
+      ],
+      features: [
+        { id: 'f1', title: 'سرعت باورنکردنی', desc: 'پیام‌ها در کسری از ثانیه ارسال می‌شن', speech: "سرعت باورنکردنی. پیام‌ها در کسری از ثانیه ارسال می‌شن." },
+        { id: 'f2', title: 'امنیت کامل', desc: 'حریم خصوصی شما اولویت ماست', speech: "امنیت کامل. حریم خصوصی شما اولویت ماست." },
+        { id: 'f3', title: 'رابط مدرن', desc: 'طراحی زیبا، ساده و کاربرپسند', speech: "رابط مدرن. طراحی زیبا، ساده و کاربرپسند." },
+        { id: 'f4', title: 'گروه و کانال', desc: 'ارتباط با دوستان، خانواده و همکاران', speech: "گروه و کانال. ارتباط با دوستان، خانواده و همکاران." },
+        { id: 'f5', title: 'تماس صوتی و تصویری', desc: 'کیفیت بالا و بدون قطعی', speech: "تماس صوتی و تصویری. کیفیت بالا و بدون قطعی." },
+        { id: 'f6', title: 'امکانات ویژه', desc: 'استیکر، ایموجی و قابلیت‌های منحصر به فرد', speech: "امکانات ویژه. استیکر، ایموجی و قابلیت‌های منحصر به فرد." }
+      ],
+      outroTitle: 'بله مله<br>رفیق جدیدت 🚀',
+      outroCta: 'همین حالا امتحان کن',
+      intro: "با بله مله آشنا شو. پیام‌رسان نسل جدید.",
+      outro: "بله مله. رفیق جدیدت. همین حالا امتحان کن!",
+      lang: 'fa-IR'
+    }
+  };
+
+  let currentLang = 'en';
+  let muted = false;
+  let voices = [];
+  let selectedVoice = null;
+
+  const stage = document.getElementById('stage');
+  const subtitle = document.getElementById('subtitle');
+  const langSelector = document.getElementById('langSelector');
+  const controls = document.getElementById('controls');
+
+  // ===== Particles & Waves =====
+  const neonColors = ['#A855F7', '#EC4899', '#F59E0B', '#8B5CF6'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+    const color = neonColors[Math.floor(Math.random() * neonColors.length)];
+    p.style.background = color;
+    p.style.boxShadow = `0 0 10px ${color}`;
+    stage.appendChild(p);
+  }
+  for (let i = 0; i < 4; i++) {
+    const w = document.createElement('div');
+    w.className = 'wave';
+    w.style.borderColor = neonColors[i % neonColors.length];
+    w.style.borderStyle = 'solid';
+    w.style.animationDelay = (i * 1) + 's';
+    stage.appendChild(w);
+  }
+
+  // ===== Sound Effects =====
+  let audioCtx = null;
+  function playTone(freq, duration = 0.15, type = 'sine', volume = 0.06) {
+    if (muted) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  // ===== Voices =====
+  function loadVoices() {
+    voices = speechSynthesis.getVoices();
+    pickVoice();
+  }
+  function pickVoice() {
+    const lang = CONTENT[currentLang].lang;
+    selectedVoice =
+      voices.find(v => v.lang === lang && /google/i.test(v.name)) ||
+      voices.find(v => v.lang === lang && /natural|premium|enhanced/i.test(v.name)) ||
+      voices.find(v => v.lang === lang) ||
+      voices.find(v => v.lang.startsWith(currentLang === 'fa' ? 'fa' : 'en')) ||
+      null;
+  }
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+
+  // ===== Speech with promise =====
+  // این تابع یک Promise برمی‌گردونه که وقتی صدا کامل خونده شد resolve می‌شه
+  function speakAndWait(text, rate = 0.9, pitch = 1.1, volume = 0.95) {
+    return new Promise((resolve) => {
+      if (muted) {
+        // اگه بی‌صدا بود، فقط یه تأخیر کوتاه بده تا هماهنگی حفظ بشه
+        setTimeout(resolve, 800);
+        return;
+      }
+
+      speechSynthesis.cancel();
+      subtitle.textContent = text;
+      subtitle.classList.add('show');
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = CONTENT[currentLang].lang;
+      utter.rate = rate;
+      utter.pitch = pitch;
+      utter.volume = volume;
+      if (selectedVoice) utter.voice = selectedVoice;
+
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        subtitle.classList.remove('show');
+        // فاصله اضافه بعد از هر جمله (نفس‌گیری)
+        setTimeout(resolve, 500);
+      };
+
+      utter.onend = finish;
+      utter.onerror = finish;
+
+      // تایم‌اوت ایمنی: اگه onend صدا نشد، بعد از مدت تخمینی رد کن
+      const estimatedMs = Math.max(1500, text.length * 90);
+      setTimeout(finish, estimatedMs + 1000);
+
+      speechSynthesis.speak(utter);
+    });
+  }
+
+  // ===== UI =====
+  function applyContent() {
+    const c = CONTENT[currentLang];
+    document.getElementById('htmlRoot').lang = currentLang;
+    document.getElementById('htmlRoot').dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+
+    document.getElementById('logoTitle').textContent = c.logoTitle;
+    document.getElementById('logoSlogan').textContent = c.logoSlogan;
+
+    c.messages.forEach(m => { document.getElementById(m.id).textContent = m.text; });
+    c.features.forEach(f => {
+      const el = document.getElementById(f.id);
+      el.querySelector('h3').textContent = f.title;
+      el.querySelector('p').textContent = f.desc;
+    });
+
+    document.getElementById('outroTitle').innerHTML = c.outroTitle;
+    document.getElementById('outroCta').textContent = c.outroCta;
+    document.getElementById('btnReplay').textContent = c.replay;
+    document.getElementById('muteBtn').textContent = muted ? c.voiceOff : c.voiceOn;
+    document.getElementById('btnLang').textContent = c.switchTo;
+
+    pickVoice();
+  }
+
+  function selectLanguage(lang) {
+    currentLang = lang;
+    applyContent();
+    langSelector.classList.add('hidden');
+    controls.style.display = 'flex';
+    setTimeout(() => { speechSynthesis.cancel(); play(); }, 500);
+  }
+
+  function switchLanguage() {
+    currentLang = currentLang === 'en' ? 'fa' : 'en';
+    applyContent();
+    restart();
+  }
+
+  function toggleMute() {
+    muted = !muted;
+    document.getElementById('muteBtn').textContent = muted ? CONTENT[currentLang].voiceOff : CONTENT[currentLang].voiceOn;
+    if (muted) {
+      speechSynthesis.cancel();
+      subtitle.classList.remove('show');
+    }
+  }
+
+  // ===== Scenes =====
+  const scenes = {
+    logo: document.getElementById('scene-logo'),
+    messages: document.getElementById('scene-messages'),
+    features: document.getElementById('scene-features'),
+    outro: document.getElementById('scene-outro')
+  };
+
+  let timers = [];
+  let runId = 0;
+
+  function clearTimers() {
+    timers.forEach(t => clearTimeout(t));
+    timers = [];
+    speechSynthesis.cancel();
+    subtitle.classList.remove('show');
+  }
+
+  function showScene(name) {
+    Object.values(scenes).forEach(s => s.classList.remove('active'));
+    scenes[name].classList.add('active');
+  }
+
+  // helper: منتظر یه مدت مشخص بمون
+  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // تابع اصلی پخش: از async/await استفاده می‌کنه تا بین جمله‌ها واقعاً صبر کنه
+  async function play() {
+    clearTimers();
+    runId++;
+    const myRun = runId;
+
+    document.querySelectorAll('.bubble').forEach(b => b.classList.remove('show'));
+    document.querySelectorAll('.feature').forEach(f => f.classList.remove('show'));
+
+    const c = CONTENT[currentLang];
+
+    // نوار پیشرفت تخمینی
+    const TOTAL = 34;
+    let elapsed = 0;
+    const tick = setInterval(() => {
+      elapsed += 0.2;
+      document.getElementById('progressBar').style.width = Math.min((elapsed / TOTAL) * 100, 100) + '%';
+      if (elapsed >= TOTAL) clearInterval(tick);
+    }, 200);
+
+    // ===== صحنه ۱: لوگو =====
+    showScene('logo');
+    playTone(523, 0.4);
+    await wait(500); if (myRun !== runId) return;
+    playTone(659, 0.4);
+    await wait(500); if (myRun !== runId) return;
+    playTone(784, 0.6);
+
+    await wait(500); if (myRun !== runId) return;
+    await speakAndWait(c.intro, 0.9, 1.1, 0.95);
+    if (myRun !== runId) return;
+
+    // فاصله بین صحنه‌ها
+    await wait(1000);
+    if (myRun !== runId) return;
+
+    // ===== صحنه ۲: پیام‌ها =====
+    showScene('messages');
+    await wait(600);
+    if (myRun !== runId) return;
+
+    for (let i = 0; i < c.messages.length; i++) {
+      if (myRun !== runId) return;
+      const m = c.messages[i];
+      document.getElementById(m.id).classList.add('show');
+      playTone(650, 0.1, 'sine', 0.05);
+      // هر پیام: اول صدا کامل خونده بشه، بعد برو بعدی
+      await speakAndWait(m.speech, m.rate, m.pitch, 0.9);
+      if (myRun !== runId) return;
+      // فاصله بین پیام‌ها
+      await wait(700);
+    }
+
+    // فاصله بین صحنه‌ها
+    await wait(1000);
+    if (myRun !== runId) return;
+
+    // ===== صحنه ۳: ویژگی‌ها =====
+    showScene('features');
+    playTone(523, 0.3);
+    playTone(784, 0.3);
+    await wait(600);
+    if (myRun !== runId) return;
+
+    for (let i = 0; i < c.features.length; i++) {
+      if (myRun !== runId) return;
+      const f = c.features[i];
+      document.getElementById(f.id).classList.add('show');
+      playTone(550, 0.12, 'sine', 0.05);
+      await speakAndWait(f.speech, 0.9, 1.05, 0.9);
+      if (myRun !== runId) return;
+      await wait(700);
+    }
+
+    // فاصله بین صحنه‌ها
+    await wait(1000);
+    if (myRun !== runId) return;
+
+    // ===== صحنه ۴: پایانی =====
+    showScene('outro');
+    playTone(659, 0.4);
+    await wait(300);
+    playTone(784, 0.4);
+    await wait(300);
+    playTone(988, 0.8);
+    await wait(500);
+    if (myRun !== runId) return;
+    await speakAndWait(c.outro, 0.9, 1.15, 0.95);
+  }
+
+  function restart() { play(); }
+
+  window.addEventListener('load', () => {
+    speechSynthesis.getVoices();
+    setTimeout(() => speechSynthesis.getVoices(), 300);
+  });
+</script>
+
+</body>
+</html>
